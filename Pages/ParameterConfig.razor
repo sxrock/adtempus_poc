@@ -1,0 +1,376 @@
+﻿@page "/parameter-config"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@using System.Text.Json
+@using BlazorApp1.Model
+@inject IWebHostEnvironment Environment
+@inject AuthenticationStateProvider AuthProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+@* <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <AuthorizeView Roles="Admin,Operator,Reader">
+        <Authorized>
+            <MudText Typo="Typo.h5" Class="mb-4">Parameter Configurations</MudText>
+            <MudTable T="ParameterConfiguration" Items="@configurations" Dense="true" Hover="true" ReadOnly="@(!IsAdminOrOperator)" Filter="new Func<ParameterConfiguration,bool>(FilterConfigFunc)"
+                      @bind-SelectedItem="selectedConfig" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+                      OnCommitEditClick="@(() => Snackbar.Add($"Saved changes to {selectedConfig?.Name}"))"
+                      RowEditPreview="BackupConfig" RowEditCancel="ResetConfigToOriginalValues" RowEditCommit="ConfigHasBeenCommitted"
+                      EditTrigger="TableEditTrigger.EditButton">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Configurations</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="configSearchString" Placeholder="Search Configurations" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+                    @if (IsAdmin)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-2" OnClick="AddNewConfiguration">Add Configuration</MudButton>
+                    }
+                </ToolBarContent>
+                <ColGroup>
+                    <col />
+                    <col />
+                    <col style="width:100px;" />
+                    @if (IsAdmin)
+                    {
+                        <col style="width:50px;" />
+                    }
+                    <col style="width:50px;" />
+                </ColGroup>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.Region)">Region</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.IsActive)">Active</MudTableSortLabel></MudTh>
+                    @if (IsAdmin)
+                    {
+                        <MudTh>Delete</MudTh>
+                    }
+                    <MudTh>Edit</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="paramContext">
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Region">@context.Region</MudTd>
+                    <MudTd DataLabel="Active">@context.IsActive</MudTd>
+                    @if (IsAdmin)
+                    {
+                        <MudTd DataLabel="Delete">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteConfiguration(context))" />
+                        </MudTd>
+                    }
+                    <MudTd DataLabel="Edit">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@context.ButtonAction" Disabled="@(!IsAdminOrOperator)" />
+                    </MudTd>
+                </RowTemplate>
+                <RowEditingTemplate Context="paramContext">
+                    <MudTd DataLabel="Name">
+                        <MudTextField @bind-Value="context.Name" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Region">
+                        <MudTextField @bind-Value="context.Region" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Active">
+                        <MudCheckBox T="bool" @bind-Value="context.IsActive" />
+                    </MudTd>
+                    @if (IsAdmin)
+                    {
+                        <MudTd DataLabel="Delete"></MudTd>
+                    }
+                    <MudTd DataLabel="Edit"></MudTd>
+                </RowEditingTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+
+            @if (selectedConfig != null)
+            {
+                <MudText Typo="Typo.h6" Class="mt-6 mb-4">ADF Parameters for @selectedConfig.Name</MudText>
+
+            }
+
+            @if (IsAdmin)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-4" OnClick="SaveConfigurations">Save to JSON</MudButton>
+            }
+
+            @if (IsAdmin)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-4" OnClick="SaveConfigurations">Save to JSON</MudButton>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <MudText Color="Color.Error">You do not have permission to access this page.</MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="mt-2" OnClick="@(() => Navigation.NavigateTo("/"))">Back to Home</MudButton>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer> *@
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <AuthorizeView Roles="Admin,Operator,Reader">
+        <Authorized>
+            @* <MudText Typo="Typo.h5" Class="mb-4">Parameter Configuration</MudText>
+            <MudText Typo="Typo.body1">Label 1: Visible to Admin, Operator, Reader</MudText>
+            @if (IsAdminOrOperator)
+            {
+            <MudText Typo="Typo.body1" Class="mt-2">Label 2: Visible to Admin, Operator</MudText>
+            }
+            @if (IsAdmin)
+            {
+            <MudText Typo="Typo.body1" Class="mt-2">Label 3: Visible to Admin only</MudText>
+            } *@
+
+            <MudText Typo="Typo.h5" Class="mb-4">Parameter Configurations</MudText>
+            <MudTable Items="@configurations" Dense="true" Hover="true" ReadOnly="@(!IsAdminOrOperator)" Filter="new Func<ParameterConfiguration,bool>(FilterConfigFunc)"
+                      @bind-SelectedItem="selectedConfig" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+                      OnCommitEditClick="@(() => Snackbar.Add($"Saved changes to {selectedConfig?.Name}"))"
+                      RowEditPreview="BackupConfig" RowEditCancel="ResetConfigToOriginalValues" RowEditCommit="ConfigHasBeenCommitted"
+                      EditTrigger="TableEditTrigger.EditButton">
+
+                <ToolBarContent>
+                    <MudTextField @bind-Value="configSearchString" Placeholder="Search Configurations" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+                    @if (IsAdmin)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-2" OnClick="AddNewConfiguration">Add Configuration</MudButton>
+                    }
+                </ToolBarContent>
+                <ColGroup>
+                    <col />
+                    <col />
+                    <col style="width:100px;" />
+                    @if (IsAdmin)
+                    {
+                        <col style="width:50px;" />
+                    }
+                    <col style="width:50px;" />
+                </ColGroup>
+                <HeaderContent >
+                   @*  <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.Name)">12Name</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.Region)">12Region</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ParameterConfiguration, object>(x=>x.IsActive)">12Active</MudTableSortLabel></MudTh> *@
+                    @if (IsAdmin)
+                    {
+                        <MudTh>Delete</MudTh>
+                    }
+                </HeaderContent>
+
+            </MudTable>
+        </Authorized>
+        <NotAuthorized>
+            <MudText Color="Color.Error">You do not have permission to access this page.</MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="mt-2" OnClick="@(() => Navigation.NavigateTo("/"))">Back to Home</MudButton>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+    private List<ParameterConfiguration> configurations = new();
+    private ParameterConfiguration selectedConfig = null;
+    private ParameterConfiguration configBeforeEdit;
+    private KeyValuePair<string, string> adfParamBeforeEdit;
+    private string configSearchString = "";
+    private string adfParamSearchString = "";
+    private bool IsAdmin => authState?.User.IsInRole("Admin") ?? false;
+    private bool IsAdminOrOperator => (authState?.User?.IsInRole("Admin") ?? false) || (authState?.User?.IsInRole("Operator") ?? false);
+    private AuthenticationState authState;
+
+    private const string adf = "Saved changes to ADF Parameter";
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+        await LoadConfigurations();
+    }
+
+    private async Task LoadConfigurations()
+    {
+        try
+        {
+            var filePath = Path.Combine(Environment.ContentRootPath, "Data", "ParameterConfiguration.json");
+            if (File.Exists(filePath))
+            {
+                var json = await File.ReadAllTextAsync(filePath);
+                var list = JsonSerializer.Deserialize<List<ParameterConfiguration>>(json) ?? new List<ParameterConfiguration>();
+                foreach(var item in list)
+                {
+                    configurations.Add(item);
+                }
+
+                Console.WriteLine($"ParameterConfiguration.razor: Loaded {configurations.Count} configurations from JSON");
+            }
+            else
+            {
+                Console.WriteLine("ParameterConfiguration.razor: JSON file not found, initializing empty list");
+                configurations = new List<ParameterConfiguration>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading configurations: {ex.Message}", Severity.Error);
+            Console.WriteLine($"ParameterConfiguration.razor: Error loading configurations - {ex.Message}, StackTrace: {ex.StackTrace}");
+        }
+    }
+
+    private async Task SaveConfigurations()
+    {
+        try
+        {
+            var filePath = Path.Combine(Environment.ContentRootPath, "Data", "ParameterConfiguration.json");
+            var json = JsonSerializer.Serialize(configurations, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(filePath, json);
+            Snackbar.Add("Configurations saved successfully", Severity.Success);
+            Console.WriteLine("ParameterConfiguration.razor: Configurations saved to JSON");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving configurations: {ex.Message}", Severity.Error);
+            Console.WriteLine($"ParameterConfiguration.razor: Error saving configurations - {ex.Message}, StackTrace: {ex.StackTrace}");
+        }
+    }
+
+    private void AddNewConfiguration()
+    {
+        if (!IsAdmin) return;
+        var newConfig = new ParameterConfiguration { Name = "New Config", Region = "Unknown", IsActive = true };
+        configurations.Add(newConfig);
+        selectedConfig = newConfig;
+        Snackbar.Add("New configuration added", Severity.Info);
+        Console.WriteLine("ParameterConfiguration.razor: Added new configuration");
+    }
+
+    private void DeleteConfiguration(ParameterConfiguration config)
+    {
+        if (!IsAdmin) return;
+        configurations.Remove(config);
+        if (selectedConfig == config) selectedConfig = null;
+        Snackbar.Add($"Deleted configuration: {config.Name}", Severity.Info);
+        Console.WriteLine($"ParameterConfiguration.razor: Deleted configuration {config.Name}");
+    }
+
+    private void AddNewAdfParameter()
+    {
+        if (!IsAdminOrOperator || selectedConfig == null) return;
+        selectedConfig.AddAdfParameter("NewKey", "NewValue");
+        Snackbar.Add("New ADF parameter added", Severity.Info);
+        Console.WriteLine("ParameterConfiguration.razor: Added new ADF parameter");
+        StateHasChanged();
+    }
+
+    private void DeleteAdfParameter(string key)
+    {
+        if (!IsAdmin || selectedConfig == null) return;
+        selectedConfig.AdfParameters.Remove(key);
+        Snackbar.Add($"Deleted ADF parameter: {key}", Severity.Info);
+        Console.WriteLine($"ParameterConfiguration.razor: Deleted ADF parameter {key}");
+        StateHasChanged();
+    }
+
+    private void BackupConfig(object config)
+    {
+        configBeforeEdit = new ParameterConfiguration
+            {
+                Name = ((ParameterConfiguration)config).Name,
+                Region = ((ParameterConfiguration)config).Region,
+                IsActive = ((ParameterConfiguration)config).IsActive,
+                AdfParameters = new Dictionary<string, string>(((ParameterConfiguration)config).AdfParameters)
+            };
+        Snackbar.Add($"Editing configuration: {((ParameterConfiguration)config).Name}", Severity.Info);
+        Console.WriteLine($"ParameterConfiguration.razor: Backed up configuration {((ParameterConfiguration)config).Name}");
+    }
+
+    private void ConfigHasBeenCommitted(object config)
+    {
+        Snackbar.Add($"Changes to configuration {((ParameterConfiguration)config).Name} committed", Severity.Success);
+        Console.WriteLine($"ParameterConfiguration.razor: Committed changes to configuration {((ParameterConfiguration)config).Name}");
+    }
+
+    private void ResetConfigToOriginalValues(object config)
+    {
+        var current = (ParameterConfiguration)config;
+        current.Name = configBeforeEdit.Name;
+        current.Region = configBeforeEdit.Region;
+        current.IsActive = configBeforeEdit.IsActive;
+        current.AdfParameters = new Dictionary<string, string>(configBeforeEdit.AdfParameters);
+        Snackbar.Add($"Editing of configuration {current.Name} canceled", Severity.Warning);
+        Console.WriteLine($"ParameterConfiguration.razor: Canceled editing of configuration {current.Name}");
+    }
+
+    private void BackupAdfParam(object param)
+    {
+        var kvp = (KeyValuePair<string, string>)param;
+        adfParamBeforeEdit = new KeyValuePair<string, string>(kvp.Key, kvp.Value);
+        Snackbar.Add($"Editing ADF parameter: {kvp.Key}", Severity.Info);
+        Console.WriteLine($"ParameterConfiguration.razor: Backed up ADF parameter {kvp.Key}");
+    }
+
+    private void AdfParamHasBeenCommitted(object param)
+    {
+        var kvp = (KeyValuePair<string, string>)param;
+        Snackbar.Add($"Changes to ADF parameter {kvp.Key} committed", Severity.Success);
+        Console.WriteLine($"ParameterConfiguration.razor: Committed changes to ADF parameter {kvp.Key}");
+    }
+
+    private void ResetAdfParamToOriginalValues(object param)
+    {
+        var current = (KeyValuePair<string, string>)param;
+        if (selectedConfig != null && selectedConfig.AdfParameters.ContainsKey(current.Key))
+        {
+            selectedConfig.AdfParameters[current.Key] = adfParamBeforeEdit.Value;
+            Snackbar.Add($"Editing of ADF parameter {current.Key} canceled", Severity.Warning);
+            Console.WriteLine($"ParameterConfiguration.razor: Canceled editing of ADF parameter {current.Key}");
+        }
+    }
+
+    private bool FilterConfigFunc(ParameterConfiguration config)
+    {
+        if (string.IsNullOrWhiteSpace(configSearchString)) return true;
+        return config.Name.Contains(configSearchString, StringComparison.OrdinalIgnoreCase) ||
+               config.Region.Contains(configSearchString, StringComparison.OrdinalIgnoreCase) ||
+               config.IsActive.ToString().Contains(configSearchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool FilterAdfParamFunc(KeyValuePair<string, string> param)
+    {
+        if (string.IsNullOrWhiteSpace(adfParamSearchString)) return true;
+        return param.Key.Contains(adfParamSearchString, StringComparison.OrdinalIgnoreCase) ||
+               param.Value.Contains(adfParamSearchString, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+
+@* @page "/parameter-config"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <AuthorizeView Roles="Admin,Operator,Reader">
+        <Authorized>
+            <MudText Typo="Typo.h5" Class="mb-4">Parameter Configuration</MudText>
+            <MudText Typo="Typo.body1">Label 1: Visible to Admin, Operator, Reader</MudText>
+            @if (IsAdminOrOperator)
+            {
+                <MudText Typo="Typo.body1" Class="mt-2">Label 2: Visible to Admin, Operator</MudText>
+            }
+            @if (IsAdmin)
+            {
+                <MudText Typo="Typo.body1" Class="mt-2">Label 3: Visible to Admin only</MudText>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <MudText Color="Color.Error">You do not have permission to access this page.</MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="mt-2" OnClick="@(() => Navigation.NavigateTo("/"))">Back to Home</MudButton>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+    private bool IsAdmin => authState?.User?.IsInRole("Admin") ?? false;
+    private bool IsAdminOrOperator => (authState?.User?.IsInRole("Admin") ?? false) || (authState?.User?.IsInRole("Operator") ?? false);
+    private AuthenticationState authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+    }
+} *@

@@ -1,0 +1,50 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <h1>Welcome to Ihub Web App</h1>
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>You are not logged in. Please log in to access your role-specific content.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <p>Hello, Admin! You can manage everything.</p>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Operator">
+    <Authorized>
+        <p>Hello, Operator! You can perform operations.</p>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Reader">
+    <Authorized>
+        <p>Hello, Reader! You can view content.</p>
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("Index.razor: OnInitialized called");
+    }
+
+    private async Task NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private async Task Logout()
+    {
+        await ((CustomAuthenticationStateProvider)AuthProvider).LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

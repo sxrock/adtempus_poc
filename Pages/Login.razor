@@ -1,0 +1,122 @@
+﻿@* @page "/login"
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="min-h-screen bg-gray-100 grid place-items-center">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md grid gap-4">
+        <h2 class="text-lg font-bold text-center">Login</h2>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-red-500 text-center">@errorMessage</p>
+        }
+        <div class="grid gap-2">
+            <label for="userId" class="text-sm font-medium text-gray-700">User ID</label>
+            <input id="userId" type="text" @bind="userId" class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter User ID" />
+        </div>
+        <div class="grid gap-2">
+            <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+            <input id="password" type="password" @bind="password" class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter Password" />
+        </div>
+        <button @onclick="LoginUser" class="px-4 py-2 bg-blue-500 text-white rounded w-full hover:bg-blue-600">Login</button>
+        <a href="/" class="text-center text-blue-500 hover:underline">Back to Home</a>
+    </div>
+</div>
+
+@code {
+    private string userId = "";
+    private string password = "";
+    private string errorMessage = "";
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"Login.razor: OnInitialized called, CurrentUri={Navigation.Uri}");
+    }
+
+    private async Task LoginUser()
+    {
+        try
+        {
+            Console.WriteLine($"Login.razor: Attempting login for UserId={userId}, Password={password}");
+            var customAuthProvider = (CustomAuthenticationStateProvider)AuthProvider;
+            await customAuthProvider.AuthenticateUser(userId, password);
+            var authState = await AuthProvider.GetAuthenticationStateAsync();
+            Console.WriteLine($"Login.razor: Authentication state after login, IsAuthenticated={authState.User.Identity.IsAuthenticated}");
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                Console.WriteLine("Login.razor: Login successful, redirecting to /");
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = "Invalid User ID or Password";
+                Console.WriteLine("Login.razor: Login failed - invalid credentials");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"Login.razor: Error during login - {ex.Message}, StackTrace: {ex.StackTrace}");
+        }
+    }
+} *@
+
+@page "/login"
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex justify-center align-center" Style="min-height: 100vh;">
+    <MudCard Elevation="3" Class="pa-6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Align="Align.Center">Login</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField @bind-Value="userId" Label="User ID" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-4" />
+            <MudTextField @bind-Value="password" Label="Password" Variant="Variant.Outlined" Margin="Margin.Dense" InputType="InputType.Password" Class="mb-4" />
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large" FullWidth="true" OnClick="LoginUser">Login</MudButton>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-4">@errorMessage</MudAlert>
+            }
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private string userId = "";
+    private string password = "";
+    private string errorMessage = "";
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"Login.razor: OnInitialized called, CurrentUri={Navigation.Uri}");
+    }
+
+    private async Task LoginUser()
+    {
+        try
+        {
+            var customAuthProvider = (CustomAuthenticationStateProvider)AuthProvider;
+            await customAuthProvider.AuthenticateUser(userId, password);
+            var authState = await AuthProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = "Invalid User ID or Password";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+}
