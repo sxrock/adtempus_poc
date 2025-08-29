@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<AuthorizeView>
+    <Authorized>
+        <p>Hello, @context.User.Identity.Name!</p>
+        <a @onclick="Logout">Log out</a>
+    </Authorized>
+    <NotAuthorized>
+        <a @onclick="NavigateToLogin">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private async Task NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private async Task Logout()
+    {
+        await ((CustomAuthenticationStateProvider)AuthProvider).LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

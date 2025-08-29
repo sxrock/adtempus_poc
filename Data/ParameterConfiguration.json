@@ -1,0 +1,28 @@
+[
+  {
+    "Name": "West-US",
+    "Region": "West-US3",
+    "IsActive": true,
+    "AdfParameters": {
+      "tenantId": "xxx-tenantid",
+      "clientId": "xxx-clientId",
+      "clientSecret": "client-secret",
+      "resourceGroupName": "res-grp",
+      "factoryName": "adf-factory-name",
+      "subscriptionId": "subid-xxx"
+    }
+  },
+  {
+    "Name": "East-US",
+    "Region": "East-US3",
+    "IsActive": false,
+    "AdfParameters": {
+      "tenantId": "xxx-tenantid",
+      "clientId": "xxx-clientId",
+      "clientSecret": "client-secret",
+      "resourceGroupName": "res-grp",
+      "factoryName": "adf-factory-name",
+      "subscriptionId": "subid-xxx"
+    }
+  }
+]
